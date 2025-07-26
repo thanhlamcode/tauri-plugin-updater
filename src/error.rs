@@ -18,6 +18,9 @@ pub enum Error {
     /// Semver errors.
     #[error(transparent)]
     Semver(#[from] semver::Error),
+    /// InstallFailed errors.
+    #[error("Failed to install the update")]
+    InstallFailed,
     /// Serialization errors.
     #[error(transparent)]
     Serialization(#[from] serde_json::Error),
