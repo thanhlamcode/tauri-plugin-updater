@@ -733,23 +733,19 @@ impl Update {
                 |p| OsString::from(format!("{p}\\System32\\msiexec.exe")),
             ),
         };
-        let file = encode_wide(file);
 
-        let parameters = installer_args.join(OsStr::new(" "));
-        let parameters = encode_wide(parameters);
 
-        unsafe {
-            ShellExecuteW(
-                std::ptr::null_mut(),
-                w!("open"),
-                file.as_ptr(),
-                parameters.as_ptr(),
-                std::ptr::null(),
-                SW_SHOW,
-            )
-        };
+        let status = std::process::Command::new(&file)
+            .args(&installer_args)
+            .status()?;
 
-        std::process::exit(0);
+        if status.success() {
+            std::process::exit(0);
+        } else {
+            // Nếu cài đặt lỗi, KHÔNG exit. Báo lỗi lên layer trên!
+            return Err(crate::Error::InstallFailed);
+        }
+
     }
 
     fn installer_args(&self) -> Vec<&OsStr> {
